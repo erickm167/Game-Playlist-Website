@@ -3,6 +3,14 @@ body {
     font-family: 'Anta', sans-serif;
 }
 
+header {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    gap: 550px;
+}
+
 #gameCarousel {
     display: flex;
     justify-content: center;

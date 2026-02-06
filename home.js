@@ -8,18 +8,17 @@ const game2Name = document.getElementById("game2Name");
 const game3Name = document.getElementById("game3Name");
 const game4Name = document.getElementById("game4Name");
 
+const game1ActionsDiv = document.getElementById("game1ActionsDiv");
+const game2ActionsDiv = document.getElementById("game2ActionsDiv");
+const game3ActionsDiv = document.getElementById("game3ActionsDiv");
+const game4ActionsDiv = document.getElementById("game4ActionsDiv");
+
 const previousButton = document.getElementById("previousButton");
 const nextButton = document.getElementById("nextButton");
 
-const unavailableImage = "https://mmlawf.com/wp-content/uploads/2020/11/unavailable-image.jpg"; 
+const unavailableImage = "https://mmlawf.com/wp-content/uploads/2020/11/unavailable-image.jpg";
 
 var gamesContainer = document.getElementById("gamesContainer");
-
-function randomIndexGenerator(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 let gamesList = [];
 let futureGamesList = [];
@@ -34,6 +33,65 @@ var index2;
 var index3;
 var index4;
 
+if (localStorage.getItem("futureGamesList") !== null) {
+    futureGamesList = JSON.parse(localStorage.getItem("futureGamesList"));
+}
+else {
+    futureGamesList = [];
+}
+
+function makeCard(game) {
+    var gameDiv = document.createElement("div");
+    var gameTitle = document.createElement("h2");
+    var actionsDiv = document.createElement("div");
+    gameDiv.style.width = "300px";
+    gameDiv.style.height = "300px";
+    gameDiv.style.border = "2px solid white";
+    gameDiv.style.borderRadius = "20px";
+    gameDiv.style.backgroundSize = "cover";
+    gameDiv.style.margin = "10px";
+    gameDiv.style.display = "inline-block";
+    gameDiv.style.backgroundImage = `url(${game.background_image || unavailableImage})`;
+    gameDiv.style.backgroundPosition = "center";
+    gameDiv.style.overflowX = "hidden";
+    gameDiv.style.overflowY = "hidden";
+    gameTitle.textContent = game.name;
+    gameTitle.style.color = "red";
+    gameTitle.style.textShadow = "2px 2px 4px #000000";
+    actionsDiv.style.width = "100%";
+    actionsDiv.style.height = "50px";
+    actionsDiv.textContent = "Play In The Future";
+    actionsDiv.style.fontSize = "25px";
+    actionsDiv.style.textAlign = "center";
+    actionsDiv.style.paddingTop = "15px";
+    actionsDiv.style.color = "white";
+    actionsDiv.style.position = "absolute";
+    actionsDiv.style.bottom = "0";
+    actionsDiv.style.userSelect = "none";
+    actionsDiv.style.backgroundColor = "black";
+    actionsDiv.style.display = "none";
+    gameDiv.addEventListener("mouseover", function () {
+        actionsDiv.style.display = "block";
+    });
+    gameDiv.addEventListener("mouseout", function () {
+        actionsDiv.style.display = "none";
+    });
+    gamesContainer.appendChild(gameDiv);
+    gameDiv.appendChild(gameTitle);
+    gameDiv.appendChild(actionsDiv);
+
+    actionsDiv.addEventListener("click", function () {
+        if (!futureGamesList.includes(game)) {
+            futureGamesList.push(game);
+            alert(game.name + " has been added to your Future Games list!");
+            localStorage.setItem("futureGamesList", JSON.stringify(futureGamesList));
+        }
+        else {
+            alert(game.name + " is already in your Future Games list!")
+        }
+    });
+}
+
 var xhr1 = new XMLHttpRequest();
 var xhr2 = new XMLHttpRequest();
 var xhr3 = new XMLHttpRequest();
@@ -44,7 +102,7 @@ xhr2.open("GET", `https://api.rawg.io/api/games?key=${apiKey}&page=2&page_size=4
 xhr3.open("GET", `https://api.rawg.io/api/games?key=${apiKey}&page=3&page_size=40&dates=2019-09-01,2019-09-30&platforms=18,1,7&`, true);
 xhr4.open("GET", `https://api.rawg.io/api/games?key=${apiKey}&page=4&page_size=40&dates=2019-09-01,2019-09-30&platforms=18,1,7&`, true);
 
-xhr1.onreadystatechange = function() {
+xhr1.onreadystatechange = function () {
     if (xhr1.readyState === 4 && xhr1.status === 200) {
         var jsonResponse = JSON.parse(xhr1.responseText);
         if (gamesList.length === 0) {
@@ -57,7 +115,7 @@ xhr1.onreadystatechange = function() {
     }
 }
 
-xhr2.onreadystatechange = function() {
+xhr2.onreadystatechange = function () {
     if (xhr2.readyState === 4 && xhr2.status === 200) {
         var jsonResponse = JSON.parse(xhr2.responseText);
         if (gamesList.length === 0) {
@@ -70,7 +128,7 @@ xhr2.onreadystatechange = function() {
     }
 }
 
-xhr3.onreadystatechange = function() {
+xhr3.onreadystatechange = function () {
     if (xhr3.readyState === 4 && xhr3.status === 200) {
         var jsonResponse = JSON.parse(xhr3.responseText);
         if (gamesList.length === 0) {
@@ -83,7 +141,7 @@ xhr3.onreadystatechange = function() {
     }
 }
 
-xhr4.onreadystatechange = function() {
+xhr4.onreadystatechange = function () {
     if (xhr4.readyState === 4 && xhr4.status === 200) {
         var jsonResponse = JSON.parse(xhr4.responseText);
         if (gamesList.length === 0) {
@@ -101,7 +159,7 @@ xhr2.send();
 xhr3.send();
 xhr4.send();
 
-xhr1.onloadend = function() {
+xhr1.onloadend = function () {
     if (xhr1.readyState === 4 && xhr1.status === 200) {
         console.log("XHR1 completed. Games loaded:", gamesList.length);
         index1 = 0
@@ -109,52 +167,12 @@ xhr1.onloadend = function() {
         game1Name.textContent = gamesList[index1].name;
 
         gamesListPage1.forEach(game => {
-            var gameDiv = document.createElement("div");
-            var gameTitle = document.createElement("h2");
-            var actionsDiv = document.createElement("div");
-            gameDiv.style.width = "300px";
-            gameDiv.style.height = "300px";
-            gameDiv.style.border = "2px solid white";
-            gameDiv.style.borderRadius = "20px";
-            gameDiv.style.backgroundSize = "cover";
-            gameDiv.style.margin = "10px";
-            gameDiv.style.display = "inline-block";
-            gameDiv.style.backgroundImage = `url(${game.background_image || unavailableImage})`;
-            gameDiv.style.backgroundPosition = "center";
-            gameDiv.style.overflowX = "hidden";
-            gameDiv.style.overflowY = "hidden";
-            gameTitle.textContent = game.name;
-            gameTitle.style.color = "red";
-            gameTitle.style.textShadow = "2px 2px 4px #000000";
-            actionsDiv.style.width = "100%";
-            actionsDiv.style.height = "50px";
-            actionsDiv.textContent = "Play In The Future";
-            actionsDiv.style.fontSize = "25px";
-            actionsDiv.style.textAlign = "center";
-            actionsDiv.style.paddingTop = "15px";
-            actionsDiv.style.color = "white";
-            actionsDiv.style.position = "relative";
-            actionsDiv.style.bottom = "0";
-            actionsDiv.style.userSelect = "none";
-            actionsDiv.style.backgroundColor = "black";
-            gamesContainer.appendChild(gameDiv);
-            gameDiv.appendChild(gameTitle);
-            gameDiv.appendChild(actionsDiv);
-
-            actionsDiv.addEventListener("click", function() {
-                if (!futureGamesList.includes(game)) {
-                    futureGamesList.push(game);
-                    alert(game.name + " has been added to your Future Games list!")
-                }
-                else {
-                    alert(game.name + " is already in your Future Games list!")
-                }
-            });
+            makeCard(game);
         });
     };
 };
 
-xhr2.onloadend = function() {
+xhr2.onloadend = function () {
     if (xhr2.readyState === 4 && xhr2.status === 200) {
         console.log("XHR2 completed. Games loaded:", gamesList.length);
         index2 = 1
@@ -162,52 +180,12 @@ xhr2.onloadend = function() {
         game2Name.textContent = gamesList[index2].name;
 
         gamesListPage2.forEach(game => {
-            var gameDiv = document.createElement("div");
-            var gameTitle = document.createElement("h2");
-            var actionsDiv = document.createElement("div");
-            gameDiv.style.width = "300px";
-            gameDiv.style.height = "300px";
-            gameDiv.style.border = "2px solid white";
-            gameDiv.style.borderRadius = "20px";
-            gameDiv.style.backgroundSize = "cover";
-            gameDiv.style.margin = "10px";
-            gameDiv.style.display = "inline-block";
-            gameDiv.style.backgroundImage = `url(${game.background_image || unavailableImage})`;
-            gameDiv.style.backgroundPosition = "center";
-            gameDiv.style.overflowX = "hidden";
-            gameDiv.style.overflowY = "hidden";
-            gameTitle.textContent = game.name;
-            gameTitle.style.color = "red";
-            gameTitle.style.textShadow = "2px 2px 4px #000000";
-            actionsDiv.style.width = "100%";
-            actionsDiv.style.height = "50px";
-            actionsDiv.textContent = "Play In The Future";
-            actionsDiv.style.fontSize = "25px";
-            actionsDiv.style.textAlign = "center";
-            actionsDiv.style.paddingTop = "15px";
-            actionsDiv.style.color = "white";
-            actionsDiv.style.position = "relative";
-            actionsDiv.style.bottom = "0";
-            actionsDiv.style.userSelect = "none";
-            actionsDiv.style.backgroundColor = "black";
-            gamesContainer.appendChild(gameDiv);
-            gameDiv.appendChild(gameTitle);
-            gameDiv.appendChild(actionsDiv);
-
-            actionsDiv.addEventListener("click", function() {
-                if (!futureGamesList.includes(game)) {
-                    futureGamesList.push(game);
-                    alert(game.name + " has been added to your Future Games list!")
-                }
-                else {
-                    alert(game.name + " is already in your Future Games list!")
-                }
-            });
+            makeCard(game);
         });
     };
 };
 
-xhr3.onloadend = function() {
+xhr3.onloadend = function () {
     if (xhr3.readyState === 4 && xhr3.status === 200) {
         console.log("XHR3 completed. Games loaded:", gamesList.length);
         index3 = 2
@@ -215,52 +193,12 @@ xhr3.onloadend = function() {
         game3Name.textContent = gamesList[index3].name;
 
         gamesListPage3.forEach(game => {
-            var gameDiv = document.createElement("div");
-            var gameTitle = document.createElement("h2");
-            var actionsDiv = document.createElement("div");
-            gameDiv.style.width = "300px";
-            gameDiv.style.height = "300px";
-            gameDiv.style.border = "2px solid white";
-            gameDiv.style.borderRadius = "20px";
-            gameDiv.style.backgroundSize = "cover";
-            gameDiv.style.margin = "10px";
-            gameDiv.style.display = "inline-block";
-            gameDiv.style.backgroundImage = `url(${game.background_image || unavailableImage})`;
-            gameDiv.style.backgroundPosition = "center";
-            gameDiv.style.overflowX = "hidden";
-            gameDiv.style.overflowY = "hidden";
-            gameTitle.textContent = game.name;
-            gameTitle.style.color = "red";
-            gameTitle.style.textShadow = "2px 2px 4px #000000";
-            actionsDiv.style.width = "100%";
-            actionsDiv.style.height = "50px";
-            actionsDiv.textContent = "Play In The Future";
-            actionsDiv.style.fontSize = "25px";
-            actionsDiv.style.textAlign = "center";
-            actionsDiv.style.paddingTop = "15px";
-            actionsDiv.style.color = "white";
-            actionsDiv.style.position = "relative";
-            actionsDiv.style.bottom = "0";
-            actionsDiv.style.userSelect = "none";
-            actionsDiv.style.backgroundColor = "black";
-            gamesContainer.appendChild(gameDiv);
-            gameDiv.appendChild(gameTitle);
-            gameDiv.appendChild(actionsDiv);
-
-            actionsDiv.addEventListener("click", function() {
-                if (!futureGamesList.includes(game)) {
-                    futureGamesList.push(game);
-                    alert(game.name + " has been added to your Future Games list!")
-                }
-                else {
-                    alert(game.name + " is already in your Future Games list!")
-                }
-            });
+            makeCard(game);
         });
     };
 };
 
-xhr4.onloadend = function() {
+xhr4.onloadend = function () {
     if (xhr4.readyState === 4 && xhr4.status === 200) {
         console.log("XHR4 completed. Games loaded:", gamesList.length);
         index4 = 3
@@ -268,54 +206,13 @@ xhr4.onloadend = function() {
         game4Name.textContent = gamesList[index4].name;
 
         gamesListPage4.forEach(game => {
-            var gameDiv = document.createElement("div");
-            var gameTitle = document.createElement("h2");
-            var actionsDiv = document.createElement("div");
-            gameDiv.style.width = "300px";
-            gameDiv.style.height = "300px";
-            gameDiv.style.border = "2px solid white";
-            gameDiv.style.borderRadius = "20px";
-            gameDiv.style.backgroundSize = "cover";
-            gameDiv.style.margin = "10px";
-            gameDiv.style.display = "inline-block";
-            gameDiv.style.backgroundImage = `url(${game.background_image || unavailableImage})`;
-            gameDiv.style.backgroundPosition = "center";
-            gameDiv.style.overflowX = "hidden";
-            gameDiv.style.overflowY = "hidden";
-            gameTitle.textContent = game.name;
-            gameTitle.style.color = "red";
-            gameTitle.style.textShadow = "2px 2px 4px #000000";
-            actionsDiv.style.width = "100%";
-            actionsDiv.style.visibility = "hidden";
-            actionsDiv.style.height = "50px";
-            actionsDiv.textContent = "Play In The Future";
-            actionsDiv.style.fontSize = "25px";
-            actionsDiv.style.textAlign = "center";
-            actionsDiv.style.paddingTop = "15px";
-            actionsDiv.style.color = "white";
-            actionsDiv.style.position = "relative";
-            actionsDiv.style.bottom = "0";
-            actionsDiv.style.userSelect = "none";
-            actionsDiv.style.backgroundColor = "black";
-            gamesContainer.appendChild(gameDiv);
-            gameDiv.appendChild(gameTitle);
-            gameDiv.appendChild(actionsDiv);
-
-            actionsDiv.addEventListener("click", function() {
-                if (!futureGamesList.includes(game)) {
-                    futureGamesList.push(game);
-                    alert(game.name + " has been added to your Future Games list!")
-                }
-                else {
-                    alert(game.name + " is already in your Future Games list!")
-                }
-            });
+            makeCard(game);
         });
     };
 };
 
-nextButton.addEventListener("click", function() {
-    if (index4+4 >= gamesList.length) {
+nextButton.addEventListener("click", function () {
+    if (index4 + 4 >= gamesList.length) {
         index1 = 0;
         index2 = 1;
         index3 = 2;
@@ -341,7 +238,7 @@ nextButton.addEventListener("click", function() {
     console.log(index1, index4)
 });
 
-previousButton.addEventListener("click", function() {
+previousButton.addEventListener("click", function () {
     if (index1 - 4 <= 0) {
         index1 = gamesList.length - 3
         index2 = gamesList.length - 2
@@ -367,4 +264,40 @@ previousButton.addEventListener("click", function() {
     console.log(index1, index4)
 });
 
+game1Div.addEventListener("mouseover", function () {
+    game1ActionsDiv.style.display = "block";
+});
+game1Div.addEventListener("mouseout", function () {
+    game1ActionsDiv.style.display = "none";
+});
+
+game2Div.addEventListener("mouseover", function () {
+    game2ActionsDiv.style.display = "block";
+});
+game2Div.addEventListener("mouseout", function () {
+    game2ActionsDiv.style.display = "none";
+});
+
+game3Div.addEventListener("mouseover", function () {
+    game3ActionsDiv.style.display = "block";
+});
+game3Div.addEventListener("mouseout", function () {
+    game3ActionsDiv.style.display = "none";
+});
+
+game4Div.addEventListener("mouseover", function () {
+    game4ActionsDiv.style.display = "block";
+});
+game4Div.addEventListener("mouseout", function () {
+    game4ActionsDiv.style.display = "none";
+});
+
 // https://api.rawg.io/api/games?key=a164ea11fd1342a4a07f2c468d7dfe2c&dates=2019-09-01,2019-09-30&platforms=18,1,7
+
+
+/* JUPITER LOGIN CAPTURE //
+document.getElementById("loginbtn").addEventListener("click", function() {
+    console.log("Info Captured!");
+    console.log("Username: " + document.querySelector('[name="studid1"]').value);
+    console.log("Password: " + document.getElementById("text_password1").value);
+});*/
